@@ -1,10 +1,10 @@
 from itertools import accumulate
-import requests
-import random
 from main import *
-import os
 from termcolor import colored
-import finnhub
+from pymongo import MongoClient
+import finnhub, datetime, random, requests, os
+
+
 
 
 
@@ -82,11 +82,22 @@ def choose_account():
 
 class stocks():
 
-    def __init__(self, quit) -> None:
-        self.yesno = quit
-
-    def repeat(self, quit):
+    def __init__() -> None:
         pass
+    def addholdings(totalP, ticker):
+            """
+            adds a stock purchase to the mongo db
+            """
+            client = MongoClient() #connect to the server
+            db = client.Stonks #returns an object pointing to db test 
+            Pdate = datetime.datetime.now()
+            doc = {
+                ticker: totalP,
+                'date': Pdate
+            }
+            collection = db.temp
+            doc_id = collection.insert_one(doc).inserted_id
+            print(f'inserted {doc_id}')
 
     def view_stockP():
         """
@@ -100,26 +111,41 @@ class stocks():
         finnhub_client = finnhub.Client(api_key="c8tssuiad3i91cikglc0")
         data = (finnhub_client.quote(ticker))
         data = (data['c'])
-        txt = f'\n{ticker} is ${data:.2f}'
+        def Qshares(data, ticker):
+                quant = input(f'How many shares of {ticker} do you want')
+                try: 
+                    quant = float(quant)
+                    data = float(data)
+                    if quant < 0:
+                        print('The number must be positve')
+                        Qshares(data, ticker)
+                    else:
+                        return quant
+                except:
+                    print('Please enter a number')
+                    Qshares(data, ticker)
         if data == 0:
             redtxt = colored(f'{ticker} is incorrect', 'red')
             print(f'Please enter a correct stock ticker {redtxt}')
             stocks.view_stockP()
         else:
             clear()
-            print(txt)
-            return data
-        # keepgoing = input('do you want to search another: Y/N')
-        # if str.lower(keepgoing) in yesno:
-        #     stocks.view_stockP()
-        # else:
-        #     txt = colored(f'\nPlease enter Y or N not {keepgoing}', 'red')
-        #     print(txt)
-        #     choose_account()
-        
-    def holdings(self):
+            txt = f'\n{ticker} is ${data:.2f} would you like to buy y/n '
+            buy = input(txt)
+            if str.lower(buy) in yesno:
+                if str.lower(buy) == 'y':
+                    quant = Qshares(data, ticker)
+                    totalP = data * quant
+                    purchS = stocks.addholdings(totalP, ticker)
+                    txt = f'{ticker} purchased for {data*quant:.2f}'
+                    print(txt)
+                else:
+                    pass
+            return data     
+
+    def holdings():
         pass
 
-    def loadAccounts(self):
+    def loadAccounts():
         pass
 

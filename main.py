@@ -2,6 +2,7 @@ from random import choice
 from menu import *
 from termcolor import colored
 
+
 def main():
     choice()
 
