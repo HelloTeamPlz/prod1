@@ -14,7 +14,7 @@ def choice():
         user_in = input('\nplease enter a number on the list: ')
 
         if user_in == '1':
-            choice = choose_account()
+            user = stocks.choose_account()
         elif user_in == '2':
             price = stocks.view_stockP()
         elif user_in == '0':
