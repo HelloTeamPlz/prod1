@@ -7,6 +7,8 @@ def main():
     choice()
 
 def choice():
+    print('Please log in')
+    stocks.choose_account()
 
     while True:
         PaperT()
@@ -17,6 +19,12 @@ def choice():
             user = stocks.choose_account()
         elif user_in == '2':
             price = stocks.view_stockP()
+        elif user_in == '3':
+            purchase = stocks.purchase()
+        elif user_in == '4':
+            holdings = stocks.holdings()
+        elif user_in == '5':
+            pass
         elif user_in == '0':
             clear()
             break
