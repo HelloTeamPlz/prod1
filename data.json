@@ -1,18 +1,18 @@
 [
     {
     "User": "bob",
-    "Ticker": "asd",
-    "PricePer": "1",
-    "#Shares" : "2",
-    "TotalPrice": "2",
+    "Ticker": "F",
+    "PricePer": "10.01",
+    "#Shares" : "200",
+    "TotalPrice": "2,002",
     "Date": "2022-03-30 17:50:07.735000"
     },
     {
         "User": "bob",
-        "Ticker": "klapa",
-        "PricePer": "1",
-        "#Shares" : "2",
-        "TotalPrice": "2",
+        "Ticker": "F",
+        "PricePer": "9.01",
+        "#Shares" : "500",
+        "TotalPrice": "4,505",
         "Date": "2022-03-31 17:50:07.735000"
     }
 ]
