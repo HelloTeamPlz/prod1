@@ -7,11 +7,9 @@ def main():
     choice()
 
 def choice():
-    print('Please log in')
     stocks.choose_account()
 
     while True:
-        PaperT()
         printMenu()
         user_in = input('\nplease enter a number on the list: ')
 
@@ -22,9 +20,15 @@ def choice():
         elif user_in == '3':
             purchase = stocks.purchase()
         elif user_in == '4':
-            holdings = stocks.holdings()
-        elif user_in == '5':
             pass
+        elif user_in == '5':
+            holdings = stocks.holdings()
+        elif user_in == '6':
+            Lholdings = stocks.loadHoldings()
+        elif user_in == '7':
+            Delholdings = stocks.remove()
+        elif user_in == '8':
+            Upholdings = stocks.updateH()
         elif user_in == '0':
             clear()
             break

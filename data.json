@@ -1,0 +1,18 @@
+[
+    {
+    "User": "bob",
+    "Ticker": "asd",
+    "PricePer": "1",
+    "#Shares" : "2",
+    "TotalPrice": "2",
+    "Date": "2022-03-30 17:50:07.735000"
+    },
+    {
+        "User": "bob",
+        "Ticker": "klapa",
+        "PricePer": "1",
+        "#Shares" : "2",
+        "TotalPrice": "2",
+        "Date": "2022-03-31 17:50:07.735000"
+    }
+]

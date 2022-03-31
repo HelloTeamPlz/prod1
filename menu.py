@@ -3,26 +3,36 @@ from operator import contains
 import string
 from unittest import result
 from xml.dom.minidom import Document
-
+from collections import Counter as Count
 from numpy import choose
 from main import *
 from termcolor import colored
-from pymongo import MongoClient
-import finnhub, datetime, random, requests, os, pprint
+from pymongo import *
+import finnhub, datetime, requests, os, json
+from bson.objectid import ObjectId
 
 def menu():
+    """
+    Stores users options in dictionay 
+    """
 
     menu = {
         1 : 'Choose Account',
         2 : 'View Stock Price',
         3 : 'Purchase',
-        4 : 'View Holdings',
-        5 : 'Load Holdings',
+        4 : 'Sell',
+        5 : 'View Holdings',
+        6 : 'Load Holdings from JSON',
+        7 : 'Delete Holdings',
+        8 : 'Force Update Holdings',
         0 : 'Exit'
         } 
     return menu
 
 def PaperT():
+    """
+    ACII art 
+    """
     print(
     '''
  _______  _______  _______  _______  ______      _______  ______    _______  ______   _______  ______   
@@ -34,20 +44,24 @@ def PaperT():
 |___|    |__| |__||___|    |_______||___|  |_|    |___|  |___|  |_||__| |__||______| |_______||___|  |_|
     '''
     )
-
-def printMenu():
-
-    x = menu()
-
-    for i in x:
-        print(f'{i} {x[i]}')
-
 def clear():
     """
     clears the terminal 
     """
     os.system('cls' if os.name=='nt' else 'clear')
     return("   ")
+
+def printMenu():
+    """
+    print s the menu so user can see the options
+    """
+    PaperT()
+    x = menu()
+
+    for i in x:
+        print(f'{i} {x[i]}')
+
+
 
 class stocks():
 
@@ -58,7 +72,12 @@ class stocks():
         """
         chooses an account 
         isnt case senstive but does require y/n to start
+        adds to a user document to store current user
+        adds to users for reusability
+        0 to exit
         """
+        clear()
+        print('Please log in')
         print('\npress 0 to go back')
         Account = input('Do you have an account: Y/N: ')
         yesno = ['y', 'n']
@@ -76,7 +95,8 @@ class stocks():
                             f.close             
                             return Account
                         else:
-                            print('Account not found please try again')
+                            name = colored(Account, 'red')
+                            print(f'Account: {name} not found please try again')
                             stocks.choose_account()
 
                 else:
@@ -117,9 +137,9 @@ class stocks():
                     stocks.choose_account()
             doc = {
                 'User': user,
-                'Ticker': ticker,
-                'PricePer': data,
-                '#Shares' : quant,
+                'Ticker': ticker.upper(),
+                'PricePer': f'{data:.2f}',
+                '#Shares' : int(quant),
                 'TotalPrice': f'{totalP:.2f}',
                 'Date': Pdate
             }
@@ -133,6 +153,7 @@ class stocks():
         {"c": 261.74,"h": 263.31,"l": 260.68,"o": 261.07,"pc": 259.45,"t": 1582641000}
         take the current price and return 
         """
+        clear()
         ticker = input('Enter stock ticker: ')
         data = stocks.get_price(ticker)
         if data == 0:
@@ -144,7 +165,7 @@ class stocks():
             pass
         else:
             clear()
-            print(f'\n{ticker} is ${data:.2f}')
+            print(f'\n{ticker.upper()} is ${data:.2f}')
             return data
 
     def get_price(ticker):
@@ -161,15 +182,16 @@ class stocks():
         if yes then user is asked how many shares if shares is not a number it cancels the order
         if they to buy it calls mongoDB func and adds the purchase to the db 
         """
+        clear()
         yesno = ['y', 'n']
         ticker = input('Enter stock ticker: ')
         data = stocks.get_price(ticker)
         if data == 0:
-            redtxt = colored(f'{ticker} is not a ticker', 'red')
+            redtxt = colored(f'{ticker.upper()} is not a ticker', 'red')
             print(f'Please enter a correct stock ticker {redtxt}')
             stocks.purchase()
         else:  
-            buy = input(f'\n{ticker} is ${data:.2f} would you like to buy y/n ')
+            buy = input(f'\n{ticker.upper()} is ${data:.2f} would you like to buy y/n ')
             if str.lower(buy) in yesno:
                 if str.lower(buy) == 'y':
                     txt = colored('WARNING', 'red')
@@ -181,27 +203,111 @@ class stocks():
                         totalP = float(quant) * data
                         clear()
                         stocks.addholdings(totalP, ticker, data, quant)
-                        print(f'{quant} of {ticker} purchased for {totalP:.2f}')
+                        print(f'{int(quant)} shares of {ticker.upper()} purchased for {totalP:.2f}')
                         return totalP
                     except:
                         clear()
                         txt = colored(f'{quant} is not a number order canceled', 'red')
                         print(f'{txt}')
-                        pass   
-                
+                        pass  
 
+    def remove():
+        client = MongoClient() #connect to the server
+        db = client.Stonks #returns an object pointing to db test
+        collection = db.Holdings
+        clear()
+        try:
+            ticker = input('Enter stock ticker: ')
+            ticker =  ticker.upper()
+            T_del = {"Ticker": ticker}
+            trash = collection.delete_many(T_del)
+            print(f'{trash.deleted_count} documents deleted')
+        except Exception as e:
+            print("An exception occurred ::", e) 
+
+    def sell(ticker):
+        price = stocks.get_price(ticker)
+             
     def holdings():
-        with open('user.txt','r') as f:
-            user = f.readlines()
-            user = user[0]
-            client = MongoClient() #connect to the server
-            db = client.Stonks #returns an object pointing to db test
-            clear()
-            for holding in db.Holdings.find({'User': f'{user}'}):
+        """
+        conects to db calls stonks collection
+        finds holdings using the user 
+        """
+        clear()
+        tickers = []
+        try:
+            with open('user.txt','r') as f:
+                user = f.readlines()
+                user = user[0]
+                if user == None:
+                    print('Please login')
+                    pass
+                else:
+                    client = MongoClient() #connect to the server
+                    db = client.Stonks #returns an object pointing to db test
+                    clear()
+                    print('=========================================')
+                    for holding in db.Holdings.find({'User': f'{user}'}):
+                        print('\n')
+                        del holding['_id']
+                        tickers.append(holding['Ticker'])
+                        for key in holding:
+                            print(f'{key}: {holding[key]}')
+        except Exception as e:
+            print("An exception occurred ::", e)
+        finally:
+            print('\nYour holdings contain:\n')
+            count = Count(tickers)
+            for key in count:
+                print(f'{key}: {count[key]}', end=" ")
+                        
+    def loadHoldings():
+        """
+        Loads holdings from the data.json file
+        checks if list to see if insert many is needed
+        else just uses insert one
+        """
+        client = MongoClient() #connect to the server
+        db = client.Stonks #returns an object pointing to db test
+        collection = db.Holdings 
+        clear()
+        print('\n=========================================')
+        try: 
+            with open('data.json') as file:
+                file_data = json.load(file)
+            if isinstance(file_data, list):
+                collection.insert_many(file_data)
+                x = len(file_data)
+                print(f'{x} docs inserted')
+            else:
+                collection.insert_one(file_data)
+                print('1 file inserted')
+
+        except Exception as e:
+            print("An exception occurred ::", e)
+
+    def updateH():
+        client = MongoClient() #connect to the server
+        db = client.Stonks #returns an object pointing to db test
+        collection = db.Holdings 
+        clear()
+        try:
+            for holding in db.Holdings.find():
                 print('\n')
-                pprint.pprint(f'{holding}')
+                for key in holding:
+                    print(f'{key}: {holding[key]}')
+            update = input('please enter the _id you want to update: ')
+            find = {'_id': ObjectId(update)}
+            new_user = input('please enter the user you want to update: ')
+            new = {"$set": {'User': new_user}}
+            collection.update_one(find, new)
+            changed = collection.find_one({'_id': ObjectId(update)})
+            print('\n')
+            clear()
+            for key in changed:
+                print(f'{key}: {changed[key]}')
 
+        except Exception as e:
+            print("An exception occurred ::", e)
 
-    def loadAccounts():
-        pass
 
