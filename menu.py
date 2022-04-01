@@ -1,6 +1,7 @@
 from itertools import accumulate
 from operator import contains
 import string
+from tokenize import group
 from unittest import result
 from xml.dom.minidom import Document
 from collections import Counter as Count
@@ -9,6 +10,7 @@ from main import *
 from termcolor import colored
 from pymongo import *
 import finnhub, datetime, requests, os, json
+import numpy as np
 from bson.objectid import ObjectId
 
 def menu():
@@ -105,7 +107,7 @@ class stocks():
                     clear()
                     print(txt)
                     newuser = open('users.txt', 'a')
-                    newuser.writelines(Account)
+                    newuser.writelines(f'\n{Account}')
                     newuser.close
                     user = open('user.txt', 'w')
                     user.write(f'\n{Account}')
@@ -195,7 +197,7 @@ class stocks():
             if str.lower(buy) in yesno:
                 if str.lower(buy) == 'y':
                     txt = colored('WARNING', 'red')
-                    print(f'{txt} if you dont enter a positive number your order will be canceled\n')
+                    print(f'{txt} if you dont enter a number your order will be canceled\n')
                     quant = input('How many shares do you want to buy: ')
                     try:
                         quant = float(quant)
@@ -287,6 +289,11 @@ class stocks():
             print("An exception occurred ::", e)
 
     def updateH():
+        """
+        connects to mongo db
+        prints all holdings in the db collection
+        updates a single stock purchase to a different user based on _id
+        """
         client = MongoClient() #connect to the server
         db = client.Stonks #returns an object pointing to db test
         collection = db.Holdings 
@@ -306,6 +313,56 @@ class stocks():
             clear()
             for key in changed:
                 print(f'{key}: {changed[key]}')
+
+        except Exception as e:
+            print("An exception occurred ::", e)
+        
+    def sale(ticker):
+        """
+        deletes from the database after a sale
+        """
+        client = MongoClient() #connect to the server
+        db = client.Stonks #returns an object pointing to db test
+        collection = db.Holdings
+        try:
+            T_del = {"Ticker": ticker}
+            trash = collection.delete_many(T_del)
+            print(f'{trash.deleted_count} documents deleted')
+        except Exception as e:
+            print("An exception occurred ::", e) 
+
+    def sell():
+        """
+        funtion to sell stocks
+        """
+        try:
+            clear()
+            avg = []
+            num_shares = []
+            ticker = input('Enter stock ticker: ')
+            curr_price = stocks.get_price(ticker)
+            client = MongoClient() #connect to the server
+            db = client.Stonks #returns an object pointing to db test
+            collection = db.Holdings 
+            ticker = ticker.upper()
+            with open('user.txt','r') as f:
+                user = f.readlines()
+                user = user[0]
+            for holding in db.Holdings.find({
+                'Ticker': f'{ticker}',
+                'User': f'{user}'
+                }):
+                avg.append(holding['PricePer'])
+                num_shares.append(holding['#Shares'])
+            avg = np.float_(avg)
+            avg_Price = sum(avg)/len(avg)
+            num_shares = sum(num_shares)
+            profitPer = curr_price - avg_Price
+            profit = (num_shares * curr_price) - (num_shares * avg_Price)
+            print(f'You made : ${profit:.2f}')
+            stocks.sale(ticker)
+            ticker = 'USD'
+            stocks.addholdings(profit, ticker, profitPer, num_shares)
 
         except Exception as e:
             print("An exception occurred ::", e)
