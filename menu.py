@@ -1,3 +1,4 @@
+import imp
 from itertools import accumulate
 from operator import contains
 import string
@@ -5,6 +6,7 @@ from tokenize import group
 from unittest import result
 from xml.dom.minidom import Document
 from collections import Counter as Count
+import matplotlib.pyplot as plt
 from numpy import choose
 from main import *
 from pymongo import *
@@ -12,6 +14,7 @@ from termcolor import colored
 import finnhub, datetime, requests, os, json
 import numpy as np
 from bson.objectid import ObjectId
+from alpha_vantage.timeseries import TimeSeries
 
 def menu():
     """
@@ -27,6 +30,7 @@ def menu():
         6 : 'Load Holdings from JSON',
         7 : 'Delete Holdings',
         8 : 'Force Update Holdings',
+        9 : 'Historical Prices Graph',
         0 : 'Exit'
         } 
     return menu
@@ -366,4 +370,25 @@ class stocks():
         except Exception as e:
             print("An exception occurred ::", e)
 
+    def s_hist():
+        try:
+            ticker = input('Enter stock ticker: ')
+            ticker = ticker.upper()
+            stockchart(ticker)
 
+        except Exception as e:
+            print("An exception occurred ::", e)
+
+def stockchart(ticker):
+    try:
+        apikey =  "NQP7G8T7UX7KC6DQ"
+        ts2 = TimeSeries(key=apikey, output_format='pandas')
+        data = ts2.get_intraday(symbol=ticker,interval='1min', outputsize='full')
+        print("index:", data.index)
+        print(data)
+        data[0]['4. close'].plot()
+        plt.title(f'Intraday Times Series for the {ticker} stock (1 min)')
+        plt.show()
+
+    except Exception as e:
+        print("An exception occurred ::", e)

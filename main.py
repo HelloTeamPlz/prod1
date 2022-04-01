@@ -29,6 +29,8 @@ def choice():
             Delholdings = stocks.remove()
         elif user_in == '8':
             Upholdings = stocks.updateH()
+        elif user_in == '9':
+            sG = stocks.s_hist()
         elif user_in == '0':
             clear()
             exit()
