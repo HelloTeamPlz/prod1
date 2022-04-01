@@ -30,7 +30,7 @@ To run this project clone it from git hub and run main.py:
 
 Step 1:
 ```
-run mongo bash file
+run mongo bat file
 ```
 Step 2:
 ```
