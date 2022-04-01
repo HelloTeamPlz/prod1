@@ -1,6 +1,6 @@
 # PaperTrader
 
-basic cli paper trader written in python
+basic cli paper trader written in python using mongodb to store stock purchases.
 
 ## Table of contents
 * [General info](#general-info)
