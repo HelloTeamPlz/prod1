@@ -116,8 +116,8 @@ class stocks():
                     user.write(f'{Account}')
                     user.close
                     return Account, 
-            except:
-                pass
+            except Exception as e:
+                        print("An exception occurred ::", e)
         elif Account == '0':
                 clear()
             
@@ -132,25 +132,29 @@ class stocks():
             need to add read write to json
             reads current user from the user file
             """
-            client = MongoClient() #connect to the server
-            db = client.Stonks #returns an object pointing to db test 
-            collection = db.Holdings
-            Pdate = datetime.datetime.now()
-            with open('user.txt','r') as f:
-                lines = f.readlines()
-                user = lines[0]
-                if lines == None:
-                    stocks.choose_account()
-            doc = {
-                'User': user,
-                'Ticker': ticker.upper(),
-                'PricePer': f'{data:.2f}',
-                '#Shares' : int(quant),
-                'TotalPrice': f'{totalP:.2f}',
-                'Date': Pdate
-            }
-            doc_id = collection.insert_one(doc).inserted_id
-            print(f'inserted {doc_id}')
+            try:
+
+                client = MongoClient() #connect to the server
+                db = client.Stonks #returns an object pointing to db test 
+                collection = db.Holdings
+                Pdate = datetime.datetime.now()
+                with open('user.txt','r') as f:
+                    lines = f.readlines()
+                    user = lines[0]
+                    if lines == None:
+                        stocks.choose_account()
+                doc = {
+                    'User': user,
+                    'Ticker': ticker.upper(),
+                    'PricePer': f'{data:.2f}',
+                    '#Shares' : int(quant),
+                    'TotalPrice': f'{totalP:.2f}',
+                    'Date': Pdate
+                }
+                doc_id = collection.insert_one(doc).inserted_id
+                print(f'inserted {doc_id}')
+            except Exception as e:
+                        print("An exception occurred ::", e)
 
     def view_stockP():
         """
@@ -158,26 +162,33 @@ class stocks():
         {"c": 261.74,"h": 263.31,"l": 260.68,"o": 261.07,"pc": 259.45,"t": 1582641000}
         take the current price and return 
         """
-        ticker = input('Enter stock ticker: ')
-        data = stocks.get_price(ticker)
-        if data == 0:
-            redtxt = colored(f'{ticker} is incorrect', 'red')
-            print(f'Please enter a correct stock ticker {redtxt}')
-            stocks.view_stockP()
-        elif ticker == '0':
-            clear()
-            pass
-        else:
-            clear()
-            print(f'\n{ticker.upper()} is ${data:.2f}')
-            return data
+        try:
+
+            ticker = input('Enter stock ticker: ')
+            data = stocks.get_price(ticker)
+            if data == 0:
+                redtxt = colored(f'{ticker} is incorrect', 'red')
+                print(f'Please enter a correct stock ticker {redtxt}')
+                stocks.view_stockP()
+            elif ticker == '0':
+                clear()
+                pass
+            else:
+                clear()
+                print(f'\n{ticker.upper()} is ${data:.2f}')
+                return data
+        except Exception as e:
+                    print("An exception occurred ::", e)
 
     def get_price(ticker):
-        ticker = ticker.upper()
-        finnhub_client = finnhub.Client(api_key="c8tssuiad3i91cikglc0")
-        data = (finnhub_client.quote(ticker))
-        data = (data['c'])
-        return data
+        try:
+            ticker = ticker.upper()
+            finnhub_client = finnhub.Client(api_key="c8tssuiad3i91cikglc0")
+            data = (finnhub_client.quote(ticker))
+            data = (data['c'])
+            return data
+        except Exception as e:
+                        print("An exception occurred ::", e)
 
     def purchase():
         """
@@ -200,20 +211,16 @@ class stocks():
                 if str.lower(buy) == 'y':
                     txt = colored('WARNING', 'red')
                     print(f'{txt} if you dont enter a number your order will be canceled\n')
-                    quant = input('How many shares do you want to buy: ')
+                    quant = float(input('How many shares do you want to buy: '))
                     try:
-                        quant = float(quant)
                         quant = abs(quant)
                         totalP = float(quant) * data
                         clear()
                         stocks.addholdings(totalP, ticker, data, quant)
                         print(f'{int(quant)} shares of {ticker.upper()} purchased for {totalP:.2f}')
                         return totalP
-                    except:
-                        clear()
-                        txt = colored(f'{quant} is not a number order canceled', 'red')
-                        print(f'{txt}')
-                        pass  
+                    except Exception as e:
+                        print("An exception occurred ::", e)
 
     def remove():
         client = MongoClient() #connect to the server
@@ -331,8 +338,7 @@ class stocks():
             trash = collection.delete_many(T_del)
             print(f'{trash.deleted_count} documents deleted')
         except Exception as e:
-            print('er')
-            # print("An exception occurred ::", e) 
+            print("An exception occurred ::", e) 
 
     def sell():
         """
