@@ -7,7 +7,6 @@ def main():
     choice()
 
 def choice():
-    stocks.choose_account()
 
     while True:
         printMenu()

@@ -82,7 +82,6 @@ class stocks():
         adds to users for reusability
         0 to exit
         """
-        clear()
         print('Please log in')
         print('\npress 0 to go back')
         Account = input('Do you have an account: Y/N: ')
@@ -111,10 +110,10 @@ class stocks():
                     clear()
                     print(txt)
                     newuser = open('users.txt', 'a')
-                    newuser.writelines(f'\n{Account}')
+                    newuser.writelines(f'{Account}\n')
                     newuser.close
                     user = open('user.txt', 'w')
-                    user.write(f'\n{Account}')
+                    user.write(f'{Account}')
                     user.close
                     return Account, 
             except:
@@ -135,6 +134,7 @@ class stocks():
             """
             client = MongoClient() #connect to the server
             db = client.Stonks #returns an object pointing to db test 
+            collection = db.Holdings
             Pdate = datetime.datetime.now()
             with open('user.txt','r') as f:
                 lines = f.readlines()
@@ -149,7 +149,6 @@ class stocks():
                 'TotalPrice': f'{totalP:.2f}',
                 'Date': Pdate
             }
-            collection = db.Holdings
             doc_id = collection.insert_one(doc).inserted_id
             print(f'inserted {doc_id}')
 
@@ -332,7 +331,8 @@ class stocks():
             trash = collection.delete_many(T_del)
             print(f'{trash.deleted_count} documents deleted')
         except Exception as e:
-            print("An exception occurred ::", e) 
+            print('er')
+            # print("An exception occurred ::", e) 
 
     def sell():
         """
@@ -351,21 +351,24 @@ class stocks():
             with open('user.txt','r') as f:
                 user = f.readlines()
                 user = user[0]
-            for holding in db.Holdings.find({
+            for holding in collection.find({
                 'Ticker': f'{ticker}',
                 'User': f'{user}'
                 }):
                 avg.append(holding['PricePer'])
                 num_shares.append(holding['#Shares'])
+                
             avg = np.float_(avg)
             num_shares = np.float_(num_shares)
-            y =  avg_Price = sum(avg)/len(avg)
+            num_shares = sum(num_shares)
+            avg_Price = sum(avg)/len(avg)
             profitPer = curr_price - avg_Price
             profit = (num_shares * curr_price) - (num_shares * avg_Price)
             print(f'You made : ${profit:.2f}')
             stocks.sale(ticker)
             ticker = 'USD'
             stocks.addholdings(profit, ticker, profitPer, num_shares)
+            
 
         except Exception as e:
             print("An exception occurred ::", e)
