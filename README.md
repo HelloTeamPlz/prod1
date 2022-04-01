@@ -38,6 +38,9 @@ $ pip install numpy
 $ pip install finnhub-python
 $ pip install matplotlib
 $ pip install alpha_vantage
+$ pip install termcolor
+$ pip install mongo db
+$ pip install requests
 ```
 Step 3:
 ```
