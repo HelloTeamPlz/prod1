@@ -395,6 +395,7 @@ def stockchart(ticker):
         data = ts2.get_intraday(symbol=ticker,interval='1min', outputsize='full')
         # print("index:", data.index)
         # print(data)
+        clear()
         data[0]['4. close'].plot()
         plt.title(f'Intraday Times Series for the {ticker} stock (1 min)')
         plt.show()
