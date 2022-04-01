@@ -7,8 +7,8 @@ from xml.dom.minidom import Document
 from collections import Counter as Count
 from numpy import choose
 from main import *
-from termcolor import colored
 from pymongo import *
+from termcolor import colored
 import finnhub, datetime, requests, os, json
 import numpy as np
 from bson.objectid import ObjectId
@@ -155,7 +155,6 @@ class stocks():
         {"c": 261.74,"h": 263.31,"l": 260.68,"o": 261.07,"pc": 259.45,"t": 1582641000}
         take the current price and return 
         """
-        clear()
         ticker = input('Enter stock ticker: ')
         data = stocks.get_price(ticker)
         if data == 0:
@@ -355,8 +354,8 @@ class stocks():
                 avg.append(holding['PricePer'])
                 num_shares.append(holding['#Shares'])
             avg = np.float_(avg)
-            avg_Price = sum(avg)/len(avg)
-            num_shares = sum(num_shares)
+            num_shares = np.float_(num_shares)
+            y =  avg_Price = sum(avg)/len(avg)
             profitPer = curr_price - avg_Price
             profit = (num_shares * curr_price) - (num_shares * avg_Price)
             print(f'You made : ${profit:.2f}')

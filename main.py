@@ -20,7 +20,7 @@ def choice():
         elif user_in == '3':
             purchase = stocks.purchase()
         elif user_in == '4':
-            pass
+            sell = stocks.sell()
         elif user_in == '5':
             holdings = stocks.holdings()
         elif user_in == '6':
@@ -31,7 +31,7 @@ def choice():
             Upholdings = stocks.updateH()
         elif user_in == '0':
             clear()
-            break
+            exit()
         else:
             clear()
             txt = colored(user_in, 'red')
