@@ -393,8 +393,8 @@ def stockchart(ticker):
         apikey =  "NQP7G8T7UX7KC6DQ"
         ts2 = TimeSeries(key=apikey, output_format='pandas')
         data = ts2.get_intraday(symbol=ticker,interval='1min', outputsize='full')
-        print("index:", data.index)
-        print(data)
+        # print("index:", data.index)
+        # print(data)
         data[0]['4. close'].plot()
         plt.title(f'Intraday Times Series for the {ticker} stock (1 min)')
         plt.show()
